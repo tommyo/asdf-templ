@@ -71,8 +71,6 @@ list_github_tags() {
 }
 
 list_all_versions() {
-	# TODO: Adapt this. By default we simply list the tag names from GitHub releases.
-	# Change this function if templ has other means of determining installable versions.
 	list_github_tags
 }
 
@@ -84,9 +82,6 @@ download_release() {
 	platform=$(get_platform)
 	arch=$(get_arch)
 
-	# TODO: Adapt the release URL convention for templ
-	# url="$GH_REPO/archive/v${version}.tar.gz"
-	# https://github.com/a-h/templ/releases/download/v0.2.663/templ_Darwin_arm64.tar.gz
 	url="${GH_REPO}/releases/download/v${version}/${TOOL_NAME}_${platform}_${arch}.tar.gz"
 
 	msg "* Downloading $TOOL_NAME release $version..."
@@ -108,7 +103,6 @@ install_version() {
 		mkdir -p "$install_path"
 		cp -r "$ASDF_DOWNLOAD_PATH"/* "$install_path"
 
-		# TODO: Assert templ executable exists.
 		local tool_cmd
 		tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
 		test -x "$install_path/$tool_cmd" || fail "Expected $install_path/$tool_cmd to be executable."
