@@ -6,17 +6,58 @@ GH_REPO="https://github.com/a-h/templ"
 TOOL_NAME="templ"
 TOOL_TEST="templ version"
 
+msg() {
+  echo -e "\033[32m$1\033[39m" >&2
+}
+
+err() {
+  echo -e "\033[31m$1\033[39m" >&2
+}
+
 fail() {
-	echo -e "asdf-$TOOL_NAME: $*"
-	exit 1
+  err "$1"
+  exit 1
 }
 
 curl_opts=(-fsSL)
 
 # NOTE: You might want to remove this if templ is not hosted on GitHub releases.
-if [ -n "${GITHUB_API_TOKEN:-}" ]; then
-	curl_opts=("${curl_opts[@]}" -H "Authorization: token $GITHUB_API_TOKEN")
-fi
+# if [ -n "${GITHUB_API_TOKEN:-}" ]; then
+# 	curl_opts=("${curl_opts[@]}" -H "Authorization: token $GITHUB_API_TOKEN")
+# fi
+
+get_platform() {
+  local silent=${1:-}
+  local platform=""
+
+  platform="$(uname)"
+
+  case "$platform" in
+    Linux | Darwin)
+      [ -z "$silent" ] && msg "Platform '${platform}' supported!"
+      ;;
+    *)
+      fail "Platform '${platform}' not supported!"
+      ;;
+  esac
+
+  printf "%s" "$platform"
+}
+
+get_arch() {
+  local arch=""
+  local arch_check=${ASDF_GOLANG_OVERWRITE_ARCH:-"$(uname -m)"}
+  case "${arch_check}" in
+    x86_64 | amd64) arch="x86_64" ;;
+    # i686 | i386 | 386) arch="i386" ;; # not supported on Darwin
+    aarch64 | arm64) arch="arm64" ;;
+    *)
+      fail "Arch '${arch_check}' not supported!"
+      ;;
+  esac
+
+  printf "%s" "$arch"
+}
 
 sort_versions() {
 	sed 'h; s/[+-]/./g; s/.p\([[:digit:]]\)/.z\1/; s/$/.z/; G; s/\n/ /' |
@@ -36,12 +77,17 @@ list_all_versions() {
 }
 
 download_release() {
-	local version filename url
+	local version filename platform arch url
 	version="$1"
 	filename="$2"
 
+	platform=$(get_platform)
+	arch=$(get_arch)
+
 	# TODO: Adapt the release URL convention for templ
-	url="$GH_REPO/archive/v${version}.tar.gz"
+	# url="$GH_REPO/archive/v${version}.tar.gz"
+	# https://github.com/a-h/templ/releases/download/v0.2.663/templ_Darwin_arm64.tar.gz
+	url="${GH_REPO}/releases/download/v${version}/${TOOL_NAME}_${platform}_${arch}.tar.gz"
 
 	echo "* Downloading $TOOL_NAME release $version..."
 	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
