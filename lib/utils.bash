@@ -91,6 +91,7 @@ download_release() {
 
 	msg "* Downloading $TOOL_NAME release $version..."
 	msg "from $url"
+	msg "to $filename"
 	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
 }
 
