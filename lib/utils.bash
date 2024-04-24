@@ -89,7 +89,8 @@ download_release() {
 	# https://github.com/a-h/templ/releases/download/v0.2.663/templ_Darwin_arm64.tar.gz
 	url="${GH_REPO}/releases/download/v${version}/${TOOL_NAME}_${platform}_${arch}.tar.gz"
 
-	echo "* Downloading $TOOL_NAME release $version..."
+	msg "* Downloading $TOOL_NAME release $version..."
+	msg "from $url"
 	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
 }
 
@@ -111,7 +112,7 @@ install_version() {
 		tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
 		test -x "$install_path/$tool_cmd" || fail "Expected $install_path/$tool_cmd to be executable."
 
-		echo "$TOOL_NAME $version installation was successful!"
+		msg "$TOOL_NAME $version installation was successful!"
 	) || (
 		rm -rf "$install_path"
 		fail "An error occurred while installing $TOOL_NAME $version."
